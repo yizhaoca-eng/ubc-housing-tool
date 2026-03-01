@@ -189,6 +189,7 @@ Three selectable cards (closest Bosa locations to UBC):
 - Shows selected location callout with: Accumulated, 5% Cap, Usable BPI Credit
 - Activates the Bosa Rent + BPI scenario box in the Calculator
 - Adds the gold dashed Bosa+BPI line to the cumulative chart
+- Calls `compute()` to rerun the full calculator — this is required so the chart and scenario box update immediately on card selection, regardless of bedroom mode (1BR or 2BR)
 
 ---
 
@@ -201,6 +202,7 @@ Three selectable cards (closest Bosa locations to UBC):
 - **Scope**: applicable to any Bosa Properties home across BC
 - **BPI rent basis**: always on full unit rent (regardless of 1BR/2BR split) — this is per program terms
 - **Calculator integration**: BPI must be calculated before the amortization loop; `bpi-rent` and `bpi-months` from the estimator are the authoritative inputs
+- **Bosa scenario activation**: triggered by `selectedBosaId` alone — the BPI sidebar toggle does not gate the Bosa chart line or scenario box; selecting a card is the single trigger
 
 ---
 
