@@ -880,8 +880,8 @@ function compute() {
   const monthlyRent = rentMode === 'alone' ? getVal('rent1br') : getVal('rent2br') / 2;
 
   // Bosa inputs — resolved before loop so chart has values
-  const bosaFullRent = bpiOn && selectedBosaId ? (parseFloat(document.getElementById('bpi-rent').value) || 0) : 0;
-  const bosaMonthsVal = bpiOn && selectedBosaId ? (parseFloat(document.getElementById('bpi-months').value) || 0) : 0;
+  const bosaFullRent = selectedBosaId ? (parseFloat(document.getElementById('bpi-rent').value) || 0) : 0;
+  const bosaMonthsVal = selectedBosaId ? (parseFloat(document.getElementById('bpi-months').value) || 0) : 0;
   // Apply same 1BR/2BR shared toggle to Bosa rent
   const bosaShare = rentMode === 'alone' ? bosaFullRent : bosaFullRent / 2;
 
@@ -1049,6 +1049,7 @@ function selectBosaLocation(id, defaultRent) {
   if (bpiRentInput) { bpiRentInput.value = defaultRent; }
   calcBpi();
   updateBosaCallout();
+  compute();
 }
 
 function updateBosaCallout() {
