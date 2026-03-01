@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UBC Housing Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --white: #ffffff;
+    --off-white: #f8f6f3;
+    --warm-grey: #e8e4df;
+    --mid-grey: #c4bdb5;
+    --text-dark: #1a1714;
+    --text-mid: #5c5550;
+    --text-light: #9a9390;
+    --rent-color: #2d6a4f;
+    --buy-color: #1d3461;
+    --accent: #8b6914;
+    --border: #dedad5;
+    --border-light: #eeebe7;
+    --tag-ac: #1d3461;
+    --tag-leasehold: #8b6914;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--off-white); color: var(--text-dark); font-family: 'Jost', sans-serif; font-weight: 300; font-size: 13px; letter-spacing: 0.02em; min-height: 100vh; }
+
+  /* ── Header ── */
+  header { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .logo em { font-style: italic; font-weight: 300; }
+  .header-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-light); }
+
+  /* ── Hero ── */
+  .hero { background: var(--white); padding: 48px 48px 40px; border-bottom: 1px solid var(--border); }
+  .hero-eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-light); margin-bottom: 10px; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 2.8rem; line-height: 1.1; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .hero h1 em { font-style: italic; }
+  .hero-sub { color: var(--text-mid); font-size: 13px; max-width: 520px; line-height: 1.7; }
+
+  /* ── Tabs ── */
+  .tab-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 48px; display: flex; gap: 0; }
+  .tab-btn { padding: 16px 24px; font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 400; color: var(--text-light); background: transparent; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; margin-bottom: -1px; }
+  .tab-btn.active { color: var(--text-dark); border-bottom-color: var(--text-dark); }
+  .tab-btn:hover:not(.active) { color: var(--text-mid); }
+
+  /* ── Tab content ── */
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* ══════════════════════════════
+     CALCULATOR TAB
+  ══════════════════════════════ */
+  .verdict-strip { background: var(--text-dark); padding: 16px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .verdict-strip .v-text { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 300; font-style: italic; color: var(--warm-grey); }
+  .verdict-pill { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 16px; border: 1px solid rgba(255,255,255,0.2); color: var(--white); white-space: nowrap; }
+  .pill-rent { border-color: #4ade80; color: #4ade80; }
+  .pill-buy { border-color: #93c5fd; color: #93c5fd; }
+  .pill-neutral { border-color: #fcd34d; color: #fcd34d; }
+
+  .calc-layout { display: grid; grid-template-columns: 296px 1fr; max-width: 1280px; margin: 0 auto; padding: 0 48px 64px; align-items: stretch; }
+  .controls { padding: 36px 28px 0 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-self: stretch; }
+  .ctrl-section { margin-bottom: 32px; }
+  .ctrl-label { font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-light); padding-bottom: 10px; border-bottom: 1px solid var(--border-light); margin-bottom: 18px; }
+  .field { margin-bottom: 18px; }
+  .field-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .fl-name { color: var(--text-mid); font-size: 11px; font-weight: 400; }
+  .fl-val { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--text-dark); }
+  input[type=range] { width: 100%; -webkit-appearance: none; height: 1px; background: var(--border); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: var(--text-dark); cursor: pointer; border: 2px solid var(--white); box-shadow: 0 0 0 1px var(--text-dark); }
+  input[type=number] { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-dark); font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; padding: 3px 0 5px; outline: none; }
+  input[type=number]:focus { border-bottom-color: var(--text-dark); }
+  .toggle-row { display: flex; border: 1px solid var(--border); margin-bottom: 18px; }
+  .toggle-btn { flex: 1; padding: 6px 0; border: none; background: transparent; color: var(--text-light); font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+  .toggle-btn.active { background: var(--text-dark); color: var(--white); }
+
+  .results { padding: 36px 0 36px 36px; display: flex; flex-direction: column; gap: 28px; align-self: start; }
+  .metrics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .metric { background: var(--white); padding: 22px 20px 18px; }
+  .metric-eyebrow { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-light); margin-bottom: 9px; }
+  .metric-val { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 300; line-height: 1; margin-bottom: 5px; }
+  .metric-sub { font-size: 10px; color: var(--text-light); }
+  .c-rent { color: var(--rent-color); } .c-buy { color: var(--buy-color); } .c-accent { color: var(--accent); }
+  .chart-card { background: var(--white); border: 1px solid var(--border); padding: 24px 24px 18px; }
+  .card-label { font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-light); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
+  .legend { display: flex; gap: 18px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-mid); }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+  /* Scenario boxes */
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .scenario-box { background: var(--white); border: 1px solid var(--border); border-top-width: 3px; padding: 24px 22px 22px; position: relative; transition: opacity 0.2s; }
+  .scenario-box.dimmed { opacity: 0.35; pointer-events: none; }
+  .sb-rent { border-top-color: var(--rent-color); }
+  .sb-buy  { border-top-color: var(--buy-color); }
+  .sb-bosa { border-top-color: var(--accent); }
+  .sb-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); }
+  .sb-title { font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; }
+  .sb-title.c-rent { color: var(--rent-color); }
+  .sb-title.c-buy  { color: var(--buy-color); }
+  .sb-title.c-bosa { color: var(--accent); }
+  .sb-net { text-align: right; }
+  .sb-net-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-light); margin-bottom: 4px; }
+  .sb-net-val { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; line-height: 1; }
+  .sb-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 10px; margin-bottom: 18px; }
+  .sb-stat {}
+  .sb-stat-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 4px; }
+  .sb-stat-val { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 300; color: var(--text-dark); line-height: 1.2; }
+  .sb-divider { border: none; border-top: 1px solid var(--border-light); margin: 14px 0; }
+  .sb-rows {}
+  .brow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-light); font-size: 11px; }
+  .brow:last-of-type { border: none; }
+  .bl { color: var(--text-mid); } .bv { font-family: 'Cormorant Garamond', serif; font-size: 1rem; }
+  .brow.btotal { margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--border); border-bottom: none; }
+  .brow.btotal .bl { color: var(--text-dark); font-weight: 400; }
+  .sb-bosa-badge { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 2px 8px; white-space: nowrap; }
+  .note-strip { background: var(--white); border: 1px solid var(--border); padding: 13px 20px; font-size: 11px; color: var(--text-mid); line-height: 1.6; }
+  .note-strip strong { color: var(--text-dark); font-weight: 400; }
+  .over { color: #b94040; } .within { color: var(--rent-color); }
+
+  /* ══════════════════════════════
+     LISTINGS TAB
+  ══════════════════════════════ */
+  .listings-wrap { max-width: 1280px; margin: 0 auto; padding: 40px 48px 64px; }
+  .listings-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .listings-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; }
+  .listings-meta { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); text-align: right; line-height: 1.6; }
+
+  /* Filter bar */
+
+  /* Grid */
+
+  /* Card */
+  .card-img { width: 100%; height: 160px; object-fit: cover; display: block; background: var(--warm-grey); position: relative; overflow: hidden; }
+  .card-img-placeholder span { font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; color: var(--text-light); letter-spacing: 0.08em; }
+  .cd-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 2px; }
+  .cd-val { font-size: 11px; color: var(--text-dark); }
+  .btn-use { padding: 9px 0; background: var(--text-dark); color: var(--white); border: none; font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: background 0.15s; }
+  .btn-use:hover { background: #2d2925; }
+
+  /* Market summary bar */
+
+  /* Source note */
+  .mls-copy:hover { color: var(--buy-color); border-bottom-color: var(--buy-color); } font-size: 10px; color: var(--text-light); line-height: 1.6; padding-top: 16px; border-top: 1px solid var(--border-light); }
+  .source-note a { color: var(--text-light); text-decoration: underline; }
+
+  /* Notification toast */
+  .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); background: var(--text-dark); color: var(--white); font-size: 11px; letter-spacing: 0.06em; padding: 12px 24px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">UBC <em>Housing</em> · Decision Tool</div>
+  <div class="header-label">Housing Decision Tool</div>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">Student Housing Analysis · Vancouver, BC</div>
+  <h1>Rent vs <em>Buy</em></h1>
+  <p class="hero-sub">Compare the financial outcomes of renting and ownership near UBC. Filter real listings, load them into the calculator, and model your decision across any time horizon.</p>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('calculator')">Calculator</button>
+  <button class="tab-btn" onclick="switchTab('listings')">Buy Listings</button>
+  <button class="tab-btn" onclick="switchTab('rentals')">Rent Listings</button>
+</div>
+
+<!-- ══════════════════════════════
+     CALCULATOR TAB
+══════════════════════════════ -->
+<div id="tab-calculator" class="tab-pane active">
+
+  <div class="verdict-strip">
+    <div class="v-text" id="verdict-text">Calculating...</div>
+    <div class="verdict-pill" id="verdict-pill"></div>
+  </div>
+
+  <div class="calc-layout">
+    <div class="controls">
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Shared Assumptions</div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Time Horizon</span><span class="fl-val" id="lbl-years">10 yrs</span></div>
+          <input type="range" id="years" min="1" max="30" value="10">
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Annual Property Appreciation</span><span class="fl-val" id="lbl-appr">4.0%</span></div>
+          <input type="range" id="appr" min="0" max="10" step="0.5" value="4">
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Investment Return (Opportunity Cost)</span><span class="fl-val" id="lbl-invest">7.0%</span></div>
+          <input type="range" id="invest" min="0" max="12" step="0.5" value="7">
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Annual Rent Inflation</span><span class="fl-val" id="lbl-rentinfl">3.0%</span></div>
+          <input type="range" id="rentinfl" min="0" max="8" step="0.5" value="3">
+        </div>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Buy Scenario</div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Purchase Price (CAD$)</span></div>
+          <input type="number" id="price" value="850000" step="10000">
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Down Payment (CAD$)</span></div>
+          <input type="number" id="dp" value="300000" step="10000">
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Mortgage Rate</span><span class="fl-val" id="lbl-rate">5.5%</span></div>
+          <input type="range" id="rate" min="1" max="10" step="0.25" value="5.5">
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Amortization</span><span class="fl-val" id="lbl-amort">25 yrs</span></div>
+          <input type="range" id="amort" min="10" max="30" step="5" value="25">
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="fl-name">Monthly Strata + Tax (CAD$)</span></div>
+          <input type="number" id="fees" value="600" step="50">
+        </div>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Sublease Option</div>
+        <div class="toggle-row">
+          <button class="toggle-btn" id="sub-off" onclick="setSublease(false)">Off</button>
+          <button class="toggle-btn active" id="sub-on" onclick="setSublease(true)">On</button>
+        </div>
+        <div id="sublease-fields">
+          <div class="field">
+            <div class="field-label"><span class="fl-name">Monthly Sublease Income (CAD$)</span></div>
+            <input type="number" id="subleaseIncome" value="900" step="50">
+          </div>
+        </div>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Rent Scenario</div>
+        <div class="toggle-row" style="margin-bottom:18px">
+          <button class="toggle-btn active" id="rent-alone-btn" onclick="setRentMode('alone')">1BR Alone</button>
+          <button class="toggle-btn" id="rent-shared-btn" onclick="setRentMode('shared')">2BR Shared</button>
+        </div>
+        <div id="rent-alone-fields">
+          <div class="field">
+            <div class="field-label"><span class="fl-name">Monthly Rent — 1BR (CAD$)</span></div>
+            <input type="number" id="rent1br" value="2000" step="50">
+          </div>
+        </div>
+        <div id="rent-shared-fields" style="display:none">
+          <div class="field">
+            <div class="field-label"><span class="fl-name">2BR Total Rent (CAD$)</span></div>
+            <input type="number" id="rent2br" value="3000" step="50">
+          </div>
+          <div class="note-strip" style="margin-top:8px; padding:10px 14px; font-size:10px; color:var(--text-mid)">
+            Your share: <strong id="rent-share-display">$1,500/mo</strong> &nbsp;(50/50 split)
+          </div>
+        </div>
+        <div style="margin-top:18px; padding-top:16px; border-top:1px solid var(--border-light)">
+          <div style="font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px">BPI Equity Program</div>
+          <div class="toggle-row" style="margin-bottom:14px">
+            <button class="toggle-btn" id="bpi-on" onclick="setBpiMode(true)" style="font-size:9.5px">Enabled (25%)</button>
+            <button class="toggle-btn active" id="bpi-off" onclick="setBpiMode(false)" style="font-size:9.5px">Disabled</button>
+          </div>
+          <div class="field" style="margin-top:12px" id="bpi-price-field">
+            <div class="field-label"><span class="fl-name">Future Bosa Purchase Price (CAD$)</span></div>
+            <input type="number" id="bpi-calc-price" value="900000" step="10000">
+          </div>
+          <div style="font-size:10px; color:var(--text-light); line-height:1.6; margin-top:10px">25% of rent → fund · usable amount capped at 5% of purchase price · valid 24 months post-tenancy</div>
+        </div>
+      </div>
+
+    </div><!-- /controls -->
+
+    <div class="results">
+      <div class="metrics-row">
+        <div class="metric">
+          <div class="metric-eyebrow">Total Cost — Rent</div>
+          <div class="metric-val c-rent" id="m-rent-total">—</div>
+          <div class="metric-sub">net of opportunity gain</div>
+        </div>
+        <div class="metric">
+          <div class="metric-eyebrow">Total Cost — Buy</div>
+          <div class="metric-val c-buy" id="m-buy-total">—</div>
+          <div class="metric-sub">net of equity</div>
+        </div>
+        <div class="metric">
+          <div class="metric-eyebrow">Break-even Year</div>
+          <div class="metric-val c-accent" id="m-breakeven">—</div>
+          <div class="metric-sub">buying becomes cheaper</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="card-label">
+          <span>Cumulative Net Cost (CAD$)</span>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#2d6a4f"></div>Rent</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#1d3461"></div>Buy</div>
+            <div class="legend-item" id="bosa-legend-item" style="display:none"><div class="legend-dot" style="background:#8b6914; border-radius:0"></div>Bosa+BPI</div>
+          </div>
+        </div>
+        <canvas id="chart" height="190"></canvas>
+      </div>
+
+      <div class="scenario-grid">
+
+        <!-- Rent Scenario Box -->
+        <div class="scenario-box sb-rent">
+          <div class="sb-header">
+            <div class="sb-title c-rent">Rent Scenario</div>
+            <div class="sb-net">
+              <div class="sb-net-label">Net Cost</div>
+              <div class="sb-net-val c-rent" id="sb-rentnet">—</div>
+            </div>
+          </div>
+          <div class="sb-stats">
+            <div class="sb-stat">
+              <div class="sb-stat-label">Monthly Rent (yr 1)</div>
+              <div class="sb-stat-val" id="sb-rent1">—</div>
+            </div>
+            <div class="sb-stat">
+              <div class="sb-stat-label">Total Rent Paid</div>
+              <div class="sb-stat-val" id="sb-rentpaid">—</div>
+            </div>
+            <div class="sb-stat">
+              <div class="sb-stat-label">Opportunity Gain</div>
+              <div class="sb-stat-val" id="sb-opp">—</div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Buy Scenario Box -->
+        <div class="scenario-box sb-buy">
+          <div class="sb-header">
+            <div class="sb-title c-buy">Buy Scenario</div>
+            <div class="sb-net">
+              <div class="sb-net-label">Net Cost</div>
+              <div class="sb-net-val c-buy" id="sb-buynet">—</div>
+            </div>
+          </div>
+          <div class="sb-stats">
+            <div class="sb-stat">
+              <div class="sb-stat-label">Monthly Mortgage</div>
+              <div class="sb-stat-val" id="sb-mortgage">—</div>
+            </div>
+            <div class="sb-stat">
+              <div class="sb-stat-label">Total Paid (mortgage + fees)</div>
+              <div class="sb-stat-val" id="sb-buypaid">—</div>
+            </div>
+            <div class="sb-stat">
+              <div class="sb-stat-label">Sublease Income</div>
+              <div class="sb-stat-val" id="sb-subincome">—</div>
+            </div>
+            <div class="sb-stat">
+              <div class="sb-stat-label">Property Equity at Exit</div>
+              <div class="sb-stat-val" id="sb-equity">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bosa Rent Scenario Box -->
+        <div class="scenario-box sb-bosa" id="sb-bosa-box">
+          <div class="sb-header">
+            <div>
+              <div class="sb-title c-bosa">Bosa Rent + BPI</div>
+              <div style="font-size:10px; color:var(--text-light); margin-top:4px" id="sb-bosa-addr">No location selected</div>
+            </div>
+            <div class="sb-net">
+              <div class="sb-net-label">Net Cost</div>
+              <div class="sb-net-val" style="color:var(--accent)" id="sb-bosanет">—</div>
+            </div>
+          </div>
+          <div class="sb-stats">
+            <div class="sb-stat">
+              <div class="sb-stat-label">Bosa Monthly Rent</div>
+              <div class="sb-stat-val" id="sb-bosa-rent">—</div>
+            </div>
+            <div class="sb-stat">
+              <div class="sb-stat-label">Total Bosa Rent Paid</div>
+              <div class="sb-stat-val" id="sb-bosa-total">—</div>
+            </div>
+            <div class="sb-stat">
+              <div class="sb-stat-label">Opportunity Gain</div>
+              <div class="sb-stat-val" id="sb-bosa-opp">—</div>
+            </div>
+            <div class="sb-stat">
+              <div class="sb-stat-label">Usable BPI Credit</div>
+              <div class="sb-stat-val" style="color:var(--accent)" id="sb-bosa-bpi">—</div>
+            </div>
+          </div>
+          <div style="font-size:10px; color:var(--text-light); line-height:1.6; padding-top:10px; border-top:1px solid var(--border-light)">
+            BPI credit deducted from total rent paid · capped at 5% of future purchase price · 24-month redemption window
+          </div>
+        </div>
+
+      </div>
+
+      <div class="note-strip" id="monthly-note"></div>
+    </div><!-- /results -->
+  </div><!-- /calc-layout -->
+</div><!-- /tab-calculator -->
+
+<!-- ══════════════════════════════
+     LISTINGS TAB
+══════════════════════════════ -->
+<div id="tab-listings" class="tab-pane">
+  <div class="listings-wrap">
+
+    <div class="listings-header">
+      <div>
+        <div class="hero-eyebrow" style="margin-bottom:6px">2-Bedroom Condos · Search Areas</div>
+        <div class="listings-title">Live Listings on Realtor.ca</div>
+      </div>
+      <div class="listings-meta">
+        Listings sourced directly from Realtor.ca MLS®<br>
+        Pre-filtered to 2BR condos for each area
+      </div>
+    </div>
+
+    <!-- Area panels -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:32px">
+
+      <!-- UBC Panel -->
+      <div style="border:1px solid var(--border); padding:32px 36px">
+        <div class="hero-eyebrow" style="margin-bottom:10px">Area 1</div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:300; margin-bottom:6px">UBC · University Endowment Lands</div>
+        <div style="font-size:11px; color:var(--text-light); margin-bottom:20px">Wesbrook Village · Hampton Place · Hawthorn Place</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--border); margin-bottom:24px">
+          <div style="padding:14px 16px; border-right:1px solid var(--border)">
+            <div class="cd-label">Transit to UBC</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">Walk or &lt;15 min bus on campus</div>
+          </div>
+          <div style="padding:14px 16px">
+            <div class="cd-label">Drive to UBC</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">&lt;5 min (on-campus)</div>
+          </div>
+          <div style="padding:14px 16px; border-right:1px solid var(--border); border-top:1px solid var(--border)">
+            <div class="cd-label">Typical Tenure</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">Leasehold (UBC ground lease)</div>
+          </div>
+          <div style="padding:14px 16px; border-top:1px solid var(--border)">
+            <div class="cd-label">Price Range (2BR)</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">~$688K – $1.4M</div>
+          </div>
+          <div style="padding:14px 16px; border-right:1px solid var(--border); border-top:1px solid var(--border)">
+            <div class="cd-label">Strata Fees</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">~$580 – $850/mo</div>
+          </div>
+          <div style="padding:14px 16px; border-top:1px solid var(--border)">
+            <div class="cd-label">Transit Fare Zone</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">1 zone</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px; color:var(--text-light); margin-bottom:20px; line-height:1.6">
+          Realtor.ca is pre-filtered to 2BR condos in University Endowment Lands. Leasehold properties are subject to UBC Properties Trust ground lease terms — confirm expiry date before making an offer.
+        </div>
+
+        <a href="https://www.realtor.ca/bc/university-endowment-lands/university-of-british-columbia/condos-for-sale"
+           target="_blank" rel="noopener"
+           style="display:block; text-align:center; padding:12px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none; transition:opacity 0.15s"
+           onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+          Search UBC Condos on Realtor.ca ↗
+        </a>
+      </div>
+
+      <!-- Capstan Panel -->
+      <div style="border:1px solid var(--border); padding:32px 36px">
+        <div class="hero-eyebrow" style="margin-bottom:10px">Area 2</div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:300; margin-bottom:6px">Capstan Village · Richmond</div>
+        <div style="font-size:11px; color:var(--text-light); margin-bottom:20px">No. 3 Rd corridor · Capstan SkyTrain Station</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--border); margin-bottom:24px">
+          <div style="padding:14px 16px; border-right:1px solid var(--border)">
+            <div class="cd-label">Transit to UBC</div>
+            <div style="font-size:13px; color:#7a5700; margin-top:3px">~40–50 min (Canada Line + bus transfer)</div>
+          </div>
+          <div style="padding:14px 16px">
+            <div class="cd-label">Drive to UBC</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">~20–25 min via Oak St bridge</div>
+          </div>
+          <div style="padding:14px 16px; border-right:1px solid var(--border); border-top:1px solid var(--border)">
+            <div class="cd-label">Typical Tenure</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">Freehold strata</div>
+          </div>
+          <div style="padding:14px 16px; border-top:1px solid var(--border)">
+            <div class="cd-label">Price Range (2BR)</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">~$780K – $1.0M</div>
+          </div>
+          <div style="padding:14px 16px; border-right:1px solid var(--border); border-top:1px solid var(--border)">
+            <div class="cd-label">Strata Fees</div>
+            <div style="font-size:13px; color:var(--text-dark); margin-top:3px">~$550 – $700/mo</div>
+          </div>
+          <div style="padding:14px 16px; border-top:1px solid var(--border)">
+            <div class="cd-label">Transit Fare Zone</div>
+            <div style="font-size:13px; color:#7a5700; margin-top:3px">2 zones (Richmond → Vancouver)</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px; color:var(--text-light); margin-bottom:20px; line-height:1.6">
+          Link goes to Richmond 2BR condos on Realtor.ca. Once there, type "Capstan" in the keyword/address search to narrow to the Capstan Village corridor. Transit time is borderline against the 45-min threshold — verify via Google Maps for your specific address.
+        </div>
+
+        <a href="https://www.realtor.ca/bc/richmond/2-bedroom-apartments-for-sale"
+           target="_blank" rel="noopener"
+           style="display:block; text-align:center; padding:12px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none; transition:opacity 0.15s"
+           onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+          Search Capstan Condos on Realtor.ca ↗
+        </a>
+      </div>
+
+    </div>
+
+    <div class="source-note">
+      Realtor.ca links are pre-filtered to 2-bedroom condos in each respective area. Listings are live and updated directly by MLS® — no stale data. Leasehold properties at UBC are subject to UBC Properties Trust ground lease terms; confirm expiry date before any offer. Transit times are estimates based on Canada Line schedules and TransLink trip planner — verify for your specific address using Google Maps or the TransLink Trip Planner.
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     RENT LISTINGS TAB
+══════════════════════════════ -->
+<div id="tab-rentals" class="tab-pane">
+  <div class="listings-wrap">
+
+    <div class="listings-header">
+      <div>
+        <div class="hero-eyebrow" style="margin-bottom:6px">Rental Apartments · Live Search</div>
+        <div class="listings-title">Rent Listings</div>
+      </div>
+      <div class="listings-meta">
+        Links open live searches on each platform<br>
+        Pre-filtered by bedroom count · AC filter manual
+      </div>
+    </div>
+
+    <!-- Bedroom toggle -->
+    <div style="display:flex; gap:0; border:1px solid var(--border); width:fit-content; margin-bottom:28px">
+      <button id="rl-1br" class="toggle-btn active" onclick="setRentListTab('1br')" style="padding:8px 28px; font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border:none; cursor:pointer; transition:all 0.15s; background:var(--text-dark); color:var(--white)">1 Bedroom</button>
+      <button id="rl-2br" class="toggle-btn" onclick="setRentListTab('2br')" style="padding:8px 28px; font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border:none; cursor:pointer; transition:all 0.15s; background:transparent; color:var(--text-light); border-left:1px solid var(--border)">2 Bedroom (Shared)</button>
+    </div>
+
+    <!-- ── UBC Area ── -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:9.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-light); padding-bottom:10px; border-bottom:1px solid var(--border-light); margin-bottom:20px">Area 1 · UBC · Wesbrook Village · Point Grey</div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:8px">
+
+        <!-- Apartments.com UBC -->
+        <div style="border:1px solid var(--border); padding:24px">
+          <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px">Apartments.com</div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:300; margin-bottom:8px">UBC Campus Housing</div>
+          <div style="font-size:11px; color:var(--text-mid); line-height:1.6; margin-bottom:16px">Pre-filtered to UBC student housing. Apply bedroom and A/C filters manually on-site. Includes purpose-built student rentals.</div>
+          <a id="apts-ubc-link" href="https://www.apartments.com/off-campus-housing/bc/vancouver/university-of-british-columbia-vancouver-main-campus/"
+             target="_blank" rel="noopener"
+             style="display:block; text-align:center; padding:10px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none">
+            Search on Apartments.com ↗
+          </a>
+        </div>
+
+        <!-- Rentals.ca UBC -->
+        <div style="border:1px solid var(--border); padding:24px">
+          <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px">Rentals.ca</div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:300; margin-bottom:8px">Vancouver · UBC Area</div>
+          <div style="font-size:11px; color:var(--text-mid); line-height:1.6; margin-bottom:16px">Pre-filtered by bedroom count. Search results cover Vancouver broadly — use the map to zoom into UBC/Point Grey/Wesbrook area.</div>
+          <a id="rentalsca-ubc-link" href="https://rentals.ca/vancouver/west-point-grey?beds=1"
+             target="_blank" rel="noopener"
+             style="display:block; text-align:center; padding:10px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none">
+            Search on Rentals.ca ↗
+          </a>
+        </div>
+
+        <!-- Craigslist UBC -->
+        <div style="border:1px solid var(--border); padding:24px">
+          <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px">Craigslist</div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:300; margin-bottom:8px">Vancouver · UBC Search</div>
+          <div style="font-size:11px; color:var(--text-mid); line-height:1.6; margin-bottom:16px">Pre-filtered by bedroom count and "ubc" keyword. Includes private landlord listings not found on other platforms. Verify listings carefully.</div>
+          <a id="craigslist-ubc-link" href="https://vancouver.craigslist.org/search/apa?query=ubc&min_bedrooms=1&max_bedrooms=1"
+             target="_blank" rel="noopener"
+             style="display:block; text-align:center; padding:10px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none">
+            Search on Craigslist ↗
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Capstan Area ── -->
+    <div style="margin-bottom:32px; margin-top:32px">
+      <div style="font-size:9.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-light); padding-bottom:10px; border-bottom:1px solid var(--border-light); margin-bottom:20px">Area 2 · Capstan Village · Richmond &nbsp;·&nbsp; <span style="color:#7a5700">Transit ~40–50 min</span></div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:8px">
+
+        <!-- Apartments.com Capstan -->
+        <div style="border:1px solid var(--border); padding:24px">
+          <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px">Apartments.com</div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:300; margin-bottom:8px">Richmond · Capstan Area</div>
+          <div style="font-size:11px; color:var(--text-mid); line-height:1.6; margin-bottom:16px">Searches Richmond apartments broadly. Apply bedroom and A/C filters on-site. Use map to narrow to the Capstan Village corridor near the SkyTrain station.</div>
+          <a id="apts-capstan-link" href="https://www.apartments.com/richmond-bc/"
+             target="_blank" rel="noopener"
+             style="display:block; text-align:center; padding:10px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none">
+            Search on Apartments.com ↗
+          </a>
+        </div>
+
+        <!-- Rentals.ca Capstan -->
+        <div style="border:1px solid var(--border); padding:24px">
+          <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px">Rentals.ca</div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:300; margin-bottom:8px">Richmond · Capstan Area</div>
+          <div style="font-size:11px; color:var(--text-mid); line-height:1.6; margin-bottom:16px">Pre-filtered by bedroom count for Richmond. Use map to zoom into Capstan Way corridor. Freehold buildings, newer stock.</div>
+          <a id="rentalsca-capstan-link" href="https://rentals.ca/richmond?beds=1"
+             target="_blank" rel="noopener"
+             style="display:block; text-align:center; padding:10px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none">
+            Search on Rentals.ca ↗
+          </a>
+        </div>
+
+        <!-- Craigslist Capstan -->
+        <div style="border:1px solid var(--border); padding:24px">
+          <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px">Craigslist</div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:300; margin-bottom:8px">Richmond · Capstan Search</div>
+          <div style="font-size:11px; color:var(--text-mid); line-height:1.6; margin-bottom:16px">Pre-filtered by bedroom count and "capstan" keyword. Includes private landlord listings. Results may be sparse — broaden to "richmond" if needed.</div>
+          <a id="craigslist-capstan-link" href="https://vancouver.craigslist.org/search/apa?query=capstan+richmond&min_bedrooms=1&max_bedrooms=1"
+             target="_blank" rel="noopener"
+             style="display:block; text-align:center; padding:10px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none">
+            Search on Craigslist ↗
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ── Bosa BPI Equity Estimator ── -->
+    <div style="margin-top:40px; margin-bottom:10px">
+      <div style="font-size:9.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-light); padding-bottom:10px; border-bottom:1px solid var(--border-light); margin-bottom:24px">BPI Equity Program · Estimator</div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px">
+        <div style="border:1px solid var(--border); padding:24px; background:var(--white)">
+          <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:16px">Inputs</div>
+          <div style="display:grid; gap:14px">
+            <div>
+              <div style="font-size:10px; color:var(--text-mid); margin-bottom:6px">Monthly Rent (CAD$)</div>
+              <input type="number" id="bpi-rent" value="2200" step="50" oninput="calcBpi()"
+                style="width:100%; padding:8px 12px; border:1px solid var(--border); background:var(--off-white); font-family:'Jost',sans-serif; font-size:12px; color:var(--text-dark)">
+            </div>
+            <div>
+              <div style="font-size:10px; color:var(--text-mid); margin-bottom:6px">Rental Duration (months)</div>
+              <input type="number" id="bpi-months" value="24" min="1" max="60" oninput="calcBpi()"
+                style="width:100%; padding:8px 12px; border:1px solid var(--border); background:var(--off-white); font-family:'Jost',sans-serif; font-size:12px; color:var(--text-dark)">
+            </div>
+            <div>
+              <div style="font-size:10px; color:var(--text-mid); margin-bottom:6px">Future Bosa Purchase Price (CAD$) <span style="color:var(--text-light)">— set in Calculator tab</span></div>
+              <div id="bpi-price-display" style="padding:8px 12px; border:1px solid var(--border-light); background:var(--warm-grey); font-family:'Jost',sans-serif; font-size:12px; color:var(--text-dark)">$900,000</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="border:1px solid var(--border); padding:24px; background:var(--white)">
+          <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light); margin-bottom:16px">BPI Equity Output</div>
+          <div style="display:grid; gap:14px">
+            <div style="border-bottom:1px solid var(--border-light); padding-bottom:14px">
+              <div style="font-size:10px; color:var(--text-mid); margin-bottom:4px">Monthly Credit (25% of rent)</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:300" id="bpi-monthly-out">—</div>
+            </div>
+            <div style="border-bottom:1px solid var(--border-light); padding-bottom:14px">
+              <div style="font-size:10px; color:var(--text-mid); margin-bottom:4px">Total Accumulated</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:300" id="bpi-total-out">—</div>
+            </div>
+            <div style="border-bottom:1px solid var(--border-light); padding-bottom:14px">
+              <div style="font-size:10px; color:var(--text-mid); margin-bottom:4px">5% Cap on Purchase Price</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:300" id="bpi-cap-out">—</div>
+            </div>
+            <div>
+              <div style="font-size:10px; color:var(--text-mid); margin-bottom:4px">Usable BPI Credit</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:400; color:var(--rent-color)" id="bpi-usable-out">—</div>
+              <div style="font-size:10px; color:var(--text-light); margin-top:4px" id="bpi-status">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:10px; color:var(--text-light); line-height:1.7; padding:12px 16px; border:1px solid var(--border-light); background:var(--white)">
+        BPI credit is capped at 5% of the purchase price of the new Bosa home. Fund is valid for 24 months after tenancy ends. Credit applies to any Bosa Properties home across BC. This estimator uses the published 25% rate — confirm current terms directly with Bosa Properties.
+      </div>
+    </div>
+
+    <!-- ── Bosa Rental Locations ── -->
+    <div style="margin-top:40px; margin-bottom:10px">
+      <div style="font-size:9.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-light); padding-bottom:10px; border-bottom:1px solid var(--border-light); margin-bottom:8px">Bosa Rental Properties · Transit to UBC</div>
+      <div style="font-size:10px; color:var(--text-light); margin-bottom:20px">The 3 Bosa locations closest to UBC — none are in the UBC or Capstan area. Transit estimates via TransLink — verify for your specific unit.</div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px">
+
+        <!-- West End -->
+        <div class="bosa-card" id="bosa-west-end" onclick="selectBosaLocation('west-end', 2595)"
+             style="border:1px solid var(--border); padding:24px; background:var(--white); cursor:pointer; transition:border-color 0.15s">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
+            <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light)">West End</div>
+            <div style="font-size:9px; padding:3px 8px; background:#e8f4ee; color:#2d6a4f; letter-spacing:0.08em">~25 min</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.05rem; font-weight:300; margin-bottom:6px">1108 Pendrell St</div>
+          <div style="font-size:11px; color:var(--text-mid); line-height:1.6; margin-bottom:16px">Bus 4 or 44 direct to UBC. Within 45-min threshold. 1BR from ~$2,595/mo.</div>
+          <div style="display:flex; gap:8px">
+            <button onclick="event.stopPropagation(); selectBosaLocation('west-end', 2595)"
+              style="flex:1; padding:8px 0; background:var(--off-white); border:1px solid var(--border); font-family:'Jost',sans-serif; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; color:var(--text-dark)" id="bosa-sel-west-end">
+              Select
+            </button>
+            <a href="https://bosaproperties.com/Rental-Listings" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+               style="flex:1; display:block; text-align:center; padding:8px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; text-decoration:none">
+              View ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- Olympic Village / Chinatown -->
+        <div class="bosa-card" id="bosa-olympic" onclick="selectBosaLocation('olympic', 1995)"
+             style="border:1px solid var(--border); padding:24px; background:var(--white); cursor:pointer; transition:border-color 0.15s">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
+            <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-light)">Olympic Village / Chinatown</div>
+            <div style="font-size:9px; padding:3px 8px; background:#fff8e6; color:#7a5700; letter-spacing:0.08em">~35–40 min</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.05rem; font-weight:300; margin-bottom:6px">Switchmen · 183 E Georgia</div>
+          <div style="font-size:11px; color:var(--text-mid); line-height:1.6; margin-bottom:16px">Bus 99 B-Line or bus + transfer. Borderline against the 45-min threshold. Studio from ~$1,995/mo.</div>
+          <div style="display:flex; gap:8px">
+            <button onclick="event.stopPropagation(); selectBosaLocation('olympic', 1995)"
+              style="flex:1; padding:8px 0; background:var(--off-white); border:1px solid var(--border); font-family:'Jost',sans-serif; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; color:var(--text-dark)" id="bosa-sel-olympic">
+              Select
+            </button>
+            <a href="https://bosaproperties.com/Rental-Listings" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+               style="flex:1; display:block; text-align:center; padding:8px 0; background:var(--text-dark); color:var(--white); font-family:'Jost',sans-serif; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; text-decoration:none">
+              View ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- West End placeholder for grid alignment -->
+        <div style="border:1px dashed var(--border-light); padding:24px; background:transparent; display:flex; align-items:center; justify-content:center">
+          <div style="font-size:10px; color:var(--text-light); text-align:center; line-height:1.7">No other Bosa rental locations within 45-min transit of UBC</div>
+        </div>
+
+      </div>
+
+      <!-- BPI Selected callout -->
+      <div id="bosa-selected-callout" style="display:none; border:1px solid var(--rent-color); padding:20px 24px; background:#f0f7f4; margin-bottom:8px">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px">
+          <div>
+            <div style="font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--rent-color); margin-bottom:6px">Selected Bosa Location</div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:300" id="bosa-sel-name">—</div>
+            <div style="font-size:11px; color:var(--text-mid); margin-top:4px">Based on BPI Estimator inputs above</div>
+          </div>
+          <div style="display:flex; gap:32px; flex-wrap:wrap">
+            <div>
+              <div style="font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:4px">Accumulated (25%)</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-size:1.3rem; font-weight:300" id="bosa-sel-raw">—</div>
+            </div>
+            <div>
+              <div style="font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:4px">5% Cap</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-size:1.3rem; font-weight:300" id="bosa-sel-cap">—</div>
+            </div>
+            <div>
+              <div style="font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:4px">Usable BPI Credit</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:400; color:var(--rent-color)" id="bosa-sel-usable">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="source-note">
+      All links open live searches and are pre-filtered by bedroom count where the platform URL supports it. Apartments.com bedroom filter must be applied manually on-site. Craigslist bedroom filter via URL parameter is best-effort — verify results on-site. Rentals.ca <code>?beds=</code> parameter is reliable. A/C is not filterable by URL on any platform — apply manually. Capstan Village transit time is approximately 40–50 min via Canada Line + bus transfer; verify for your specific unit.
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">Loaded into Calculator</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+/* ─── Tab switching ─── */
+let rentListTab = '1br';
+
+function setRentListTab(mode) {
+  rentListTab = mode;
+  const is1br = mode === '1br';
+  document.getElementById('rl-1br').style.background = is1br ? 'var(--text-dark)' : 'transparent';
+  document.getElementById('rl-1br').style.color = is1br ? 'var(--white)' : 'var(--text-light)';
+  document.getElementById('rl-2br').style.background = !is1br ? 'var(--text-dark)' : 'transparent';
+  document.getElementById('rl-2br').style.color = !is1br ? 'var(--white)' : 'var(--text-light)';
+
+  const beds = is1br ? 1 : 2;
+  const bedsMax = is1br ? 1 : 2;
+
+  // Apartments.com: no reliable bedroom URL param, link stays same
+  // Rentals.ca
+  document.getElementById('rentalsca-ubc-link').href = `https://rentals.ca/vancouver/west-point-grey?beds=${beds}`;
+  document.getElementById('rentalsca-capstan-link').href = `https://rentals.ca/richmond?beds=${beds}`;
+  // Craigslist
+  document.getElementById('craigslist-ubc-link').href = `https://vancouver.craigslist.org/search/apa?query=ubc&min_bedrooms=${beds}&max_bedrooms=${bedsMax}`;
+  document.getElementById('craigslist-capstan-link').href = `https://vancouver.craigslist.org/search/apa?query=capstan+richmond&min_bedrooms=${beds}&max_bedrooms=${bedsMax}`;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick') === "switchTab('" + name + "')") b.classList.add('active');
+  });
+}
+
+/* ─── Calculator logic ─── */
+let subleaseOn = true;
+let bpiOn = false;
+let chartInstance = null;
+
+let rentMode = 'alone';
+
+function setRentMode(mode) {
+  rentMode = mode;
+  document.getElementById('rent-alone-btn').classList.toggle('active', mode === 'alone');
+  document.getElementById('rent-shared-btn').classList.toggle('active', mode === 'shared');
+  document.getElementById('rent-alone-fields').style.display = mode === 'alone' ? '' : 'none';
+  document.getElementById('rent-shared-fields').style.display = mode === 'shared' ? '' : 'none';
+  compute();
+}
+
+function setBpiMode(val) {
+  bpiOn = val;
+  document.getElementById('bpi-on').classList.toggle('active', val);
+  document.getElementById('bpi-off').classList.toggle('active', !val);
+  document.getElementById('bpi-price-field').style.opacity = val ? '1' : '0.35';
+  document.getElementById('bpi-price-field').style.pointerEvents = val ? '' : 'none';
+  compute();
+}
+
+function setSublease(val) {
+  subleaseOn = val;
+  document.getElementById('sub-on').classList.toggle('active', val);
+  document.getElementById('sub-off').classList.toggle('active', !val);
+  document.getElementById('sublease-fields').style.opacity = val ? '1' : '0.35';
+  compute();
+}
+
+function fmt(n) {
+  if (Math.abs(n) >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  return '$' + Math.round(n).toLocaleString();
+}
+function fmtPct(v) { return v.toFixed(1) + '%'; }
+function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+function calcMortgage(principal, annualRate, years) {
+  const r = annualRate / 100 / 12;
+  const n = years * 12;
+  if (r === 0) return principal / n;
+  return principal * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+}
+
+function compute() {
+  const years = getVal('years'), apprRate = getVal('appr')/100, investRate = getVal('invest')/100;
+  const rentInfl = getVal('rentinfl')/100, price = getVal('price'), dp = getVal('dp');
+  const rate = getVal('rate'), amort = getVal('amort'), fees = getVal('fees');
+  const sublease = subleaseOn ? getVal('subleaseIncome') : 0;
+  // monthlyRent = user's share based on rent mode toggle (same toggle applies to Bosa)
+  const monthlyRent = rentMode === 'alone' ? getVal('rent1br') : getVal('rent2br') / 2;
+
+  // Bosa inputs — resolved before loop so chart has values
+  const bosaFullRent = bpiOn && selectedBosaId ? (parseFloat(document.getElementById('bpi-rent').value) || 0) : 0;
+  const bosaMonthsVal = bpiOn && selectedBosaId ? (parseFloat(document.getElementById('bpi-months').value) || 0) : 0;
+  // Apply same 1BR/2BR shared toggle to Bosa rent
+  const bosaShare = rentMode === 'alone' ? bosaFullRent : bosaFullRent / 2;
+
+  document.getElementById('lbl-years').textContent = years + ' yrs';
+  if (rentMode === 'shared') {
+    const shareAmt = getVal('rent2br') / 2;
+    document.getElementById('rent-share-display').textContent = '$' + Math.round(shareAmt).toLocaleString() + '/mo';
+  }
+  document.getElementById('lbl-appr').textContent = fmtPct(getVal('appr'));
+  document.getElementById('lbl-invest').textContent = fmtPct(getVal('invest'));
+  document.getElementById('lbl-rentinfl').textContent = fmtPct(getVal('rentinfl'));
+  document.getElementById('lbl-rate').textContent = fmtPct(getVal('rate'));
+  document.getElementById('lbl-amort').textContent = amort + ' yrs';
+
+  const principal = price - dp;
+  const monthlyMortgage = calcMortgage(principal, rate, amort);
+  const r = rate / 100 / 12;
+
+  // BPI — must be before loop as bpiUsable is used inside it
+  const bpiMonths = bpiOn ? (parseFloat(document.getElementById('bpi-months').value) || 0) : 0;
+  const bpiRent = bpiOn ? (parseFloat(document.getElementById('bpi-rent').value) || monthlyRent) : 0;
+  const bpiRaw = bpiOn ? bpiRent * 0.25 * bpiMonths : 0;
+  const bpiFuturePrice = bpiOn ? (parseFloat(document.getElementById('bpi-calc-price').value) || 0) : 0;
+  const bpiCap = bpiFuturePrice * 0.05;
+  const bpiUsable = bpiOn ? Math.min(bpiRaw, bpiCap) : 0;
+
+  let totalRentPaid = 0, totalBuyPaid = 0, totalSubIncome = 0, totalBosaRentPaid = 0;
+  let investedDp = dp, balance = principal;
+  const rentCum = [], buyCum = [], bosaCum = [], labels = [];
+
+  for (let mo = 1; mo <= years * 12; mo++) {
+    const yr = Math.floor((mo-1)/12);
+    const inflFactor = Math.pow(1+rentInfl, yr);
+    // Rent scenario: monthly rent inflated annually
+    totalRentPaid += monthlyRent * inflFactor;
+    // Bosa scenario: bosaShare for bosaMonthsVal, then same as rent scenario
+    const bosaMonthly = (bosaShare > 0 && mo <= bosaMonthsVal)
+      ? bosaShare
+      : monthlyRent * inflFactor;
+    totalBosaRentPaid += bosaMonthly;
+    investedDp *= (1 + investRate/12);
+    const interest = r > 0 ? balance * r : 0;
+    balance = Math.max(0, balance - (monthlyMortgage - interest));
+    totalBuyPaid += monthlyMortgage + fees;
+    totalSubIncome += sublease;
+    if (mo % 12 === 0) {
+      labels.push('Yr ' + mo/12);
+      const propVal = price * Math.pow(1+apprRate, mo/12);
+      const equity = propVal - balance;
+      const oppGain = investedDp - dp;
+      rentCum.push(Math.round(totalRentPaid - oppGain));
+      buyCum.push(Math.round(totalBuyPaid - totalSubIncome - (equity - dp) - dp));
+      if (bosaShare > 0) {
+        bosaCum.push(Math.round(totalBosaRentPaid - oppGain - bpiUsable));
+      }
+    }
+  }
+
+  let breakEven = null;
+  for (let i = 0; i < rentCum.length; i++) { if (buyCum[i] <= rentCum[i]) { breakEven = i+1; break; } }
+
+  const finalRentNet = rentCum[rentCum.length-1], finalBuyNet = buyCum[buyCum.length-1];
+  const finalEquity = price * Math.pow(1+apprRate, years) - balance;
+
+  document.getElementById('m-rent-total').textContent = fmt(finalRentNet);
+  document.getElementById('m-buy-total').textContent = fmt(finalBuyNet);
+  document.getElementById('m-breakeven').textContent = breakEven ? 'Year ' + breakEven : '>' + years + ' yrs';
+  // bpiUsable calculated before loop
+  // ── Rent scenario box ──
+  const rentModeLabel = rentMode === 'shared' ? ' (your share)' : '';
+  document.getElementById('sb-rent1').textContent = fmt(monthlyRent) + '/mo' + rentModeLabel;
+  document.getElementById('sb-rentpaid').textContent = fmt(totalRentPaid);
+  document.getElementById('sb-opp').textContent = fmt(investedDp - dp);
+  document.getElementById('sb-rentnet').textContent = fmt(finalRentNet);
+  const bpiCapNote = bpiOn && bpiRaw > bpiCap ? ' (capped)' : '';
+
+  // ── Buy scenario box ──
+  document.getElementById('sb-mortgage').textContent = fmt(monthlyMortgage) + '/mo';
+  document.getElementById('sb-buypaid').textContent = fmt(totalBuyPaid);
+  document.getElementById('sb-subincome').textContent = subleaseOn ? fmt(totalSubIncome) : '—';
+  document.getElementById('sb-equity').textContent = fmt(finalEquity);
+  document.getElementById('sb-buynet').textContent = fmt(finalBuyNet);
+
+  // ── Bosa scenario box ──
+  const bosaBox = document.getElementById('sb-bosa-box');
+  if (bpiOn && selectedBosaId) {
+    bosaBox.classList.remove('dimmed');
+    const bosaRentLabel = rentMode === 'alone' ? fmt(bosaFullRent) + '/mo' : fmt(bosaShare) + '/mo (your share)';
+    document.getElementById('sb-bosa-addr').textContent = bosaNames[selectedBosaId] || selectedBosaId;
+    document.getElementById('sb-bosa-rent').textContent = bosaRentLabel;
+    document.getElementById('sb-bosa-total').textContent = fmt(totalBosaRentPaid);
+    document.getElementById('sb-bosa-opp').textContent = fmt(investedDp - dp);
+    document.getElementById('sb-bosa-bpi').textContent = '−' + fmt(bpiUsable) + bpiCapNote;
+    const bosаNet = totalBosaRentPaid - (investedDp - dp) - bpiUsable;
+    document.getElementById('sb-bosanет').textContent = fmt(bosаNet);
+  } else {
+    bosaBox.classList.add('dimmed');
+    document.getElementById('sb-bosa-addr').textContent = 'No location selected';
+    document.getElementById('sb-bosanет').textContent = '—';
+  }
+
+  const effBuy = monthlyMortgage + fees - sublease;
+  document.getElementById('monthly-note').innerHTML =
+    `Effective monthly buy cost (mortgage + strata${subleaseOn ? ' − sublease' : ''}): <strong>${fmt(effBuy)}/mo</strong> — ` +
+    (effBuy > 2500
+      ? `<span class="over">exceeds the $2,500 monthly budget.</span>`
+      : `<span class="within">within the $2,500 monthly budget.</span>`);
+
+  const diff = finalBuyNet - finalRentNet;
+  let vText, pText, pClass;
+  if (Math.abs(diff) < 20000) {
+    vText = `Over ${years} years, renting and buying produce roughly equivalent net costs${bpiOn ? '' : ''}.`;
+    pText = 'Neutral'; pClass = 'verdict-pill pill-neutral';
+  } else if (diff > 0) {
+    vText = `Renting is favoured by approximately ${fmt(Math.abs(diff))} net over ${years} years${bpiOn ? '' : ''}.`;
+    pText = 'Rent Favoured'; pClass = 'verdict-pill pill-rent';
+  } else {
+    vText = `Buying is favoured by approximately ${fmt(Math.abs(diff))} net over ${years} years${bpiOn ? '' : ''}.`;
+    pText = 'Buy Favoured'; pClass = 'verdict-pill pill-buy';
+  }
+  document.getElementById('verdict-text').textContent = vText;
+  const pill = document.getElementById('verdict-pill');
+  pill.textContent = pText; pill.className = pClass;
+  const bosaLegend = document.getElementById('bosa-legend-item');
+  if (bosaLegend) bosaLegend.style.display = bosaShare > 0 ? '' : 'none';
+
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(document.getElementById('chart').getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Rent', data: rentCum, borderColor: '#2d6a4f', backgroundColor: 'rgba(45,106,79,0.04)', borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4, tension: 0.35, fill: true },
+      { label: 'Buy',  data: buyCum,  borderColor: '#1d3461', backgroundColor: 'rgba(29,52,97,0.04)',  borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4, tension: 0.35, fill: true },
+      ...(bosaShare > 0 ? [{ label: 'Bosa+BPI', data: bosaCum, borderColor: '#8b6914', backgroundColor: 'rgba(139,105,20,0.04)', borderWidth: 1.5, borderDash: [4,3], pointRadius: 0, pointHoverRadius: 4, tension: 0.35, fill: true }] : [])
+    ]},
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#1a1714', borderColor: '#3a3632', borderWidth: 1, titleColor: '#c4bdb5', bodyColor: '#9a9390', titleFont: { family: 'Jost', size: 11, weight: '300' }, bodyFont: { family: 'Jost', size: 11, weight: '300' }, padding: 12, callbacks: { label: ctx => '  ' + ctx.dataset.label + ':  ' + fmt(ctx.raw) } }
+      },
+      scales: {
+        x: { ticks: { color: '#9a9390', font: { family: 'Jost', size: 10 }, maxRotation: 0 }, grid: { color: '#eeebe7' }, border: { color: '#dedad5' } },
+        y: { ticks: { color: '#9a9390', font: { family: 'Jost', size: 10 }, callback: v => fmt(v) }, grid: { color: '#eeebe7' }, border: { color: '#dedad5' } }
+      }
+    }
+  });
+}
+
+/* ─── Bosa Location Selection ─── */
+let selectedBosaId = null;
+const bosaNames = { 'west-end': 'West End · 1108 Pendrell St', 'olympic': 'Olympic Village / Chinatown · Switchmen' };
+
+function selectBosaLocation(id, defaultRent) {
+  selectedBosaId = id;
+  // Highlight selected card
+  document.querySelectorAll('.bosa-card').forEach(c => c.style.borderColor = 'var(--border)');
+  document.querySelectorAll('[id^="bosa-sel-"]').forEach(b => { b.textContent = 'Select'; b.style.background = 'var(--off-white)'; });
+  const card = document.getElementById('bosa-' + id);
+  if (card) card.style.borderColor = 'var(--rent-color)';
+  const btn = document.getElementById('bosa-sel-' + id);
+  if (btn) { btn.textContent = '✓ Selected'; btn.style.background = 'var(--rent-color)'; btn.style.color = 'var(--white)'; btn.style.border = 'none'; }
+  // Sync rent to BPI estimator if estimator rent is still default
+  const bpiRentInput = document.getElementById('bpi-rent');
+  if (bpiRentInput) { bpiRentInput.value = defaultRent; }
+  calcBpi();
+  updateBosaCallout();
+}
+
+function updateBosaCallout() {
+  if (!selectedBosaId) return;
+  const callout = document.getElementById('bosa-selected-callout');
+  const rent = parseFloat(document.getElementById('bpi-rent').value) || 0;
+  const months = parseFloat(document.getElementById('bpi-months').value) || 0;
+  const price = parseFloat(document.getElementById('bpi-calc-price').value) || 0;
+  const raw = rent * 0.25 * months;
+  const cap = price * 0.05;
+  const usable = Math.min(raw, cap);
+  const fmt2 = v => '$' + Math.round(v).toLocaleString();
+  document.getElementById('bosa-sel-name').textContent = bosaNames[selectedBosaId] || selectedBosaId;
+  document.getElementById('bosa-sel-raw').textContent = fmt2(raw);
+  document.getElementById('bosa-sel-cap').textContent = fmt2(cap);
+  document.getElementById('bosa-sel-usable').textContent = fmt2(usable);
+  callout.style.display = 'block';
+}
+
+/* ─── BPI Estimator ─── */
+function calcBpi() {
+  const rent = parseFloat(document.getElementById('bpi-rent').value) || 0;
+  const months = parseFloat(document.getElementById('bpi-months').value) || 0;
+  const price = parseFloat(document.getElementById('bpi-calc-price').value) || 0;
+  const monthly = rent * 0.25;
+  const total = monthly * months;
+  const cap = price * 0.05;
+  const usable = Math.min(total, cap);
+  const fmt2 = v => '$' + Math.round(v).toLocaleString();
+  document.getElementById('bpi-monthly-out').textContent = fmt2(monthly) + '/mo';
+  document.getElementById('bpi-total-out').textContent = fmt2(total);
+  document.getElementById('bpi-cap-out').textContent = fmt2(cap);
+  document.getElementById('bpi-usable-out').textContent = fmt2(usable);
+  if (selectedBosaId) updateBosaCallout();
+  document.getElementById('bpi-status').textContent = total > cap
+    ? 'Capped — accumulated ' + fmt2(total) + ' but max credit is ' + fmt2(cap)
+    : 'Under cap — full ' + fmt2(total) + ' credit available';
+}
+
+/* ─── Init ─── */
+['years','appr','invest','rentinfl','rate','amort'].forEach(id => document.getElementById(id).addEventListener('input', compute));
+['price','dp','fees','subleaseIncome','rent1br','rent2br','bpi-calc-price','bpi-rent','bpi-months'].forEach(id => document.getElementById(id).addEventListener('input', compute));
+document.getElementById('bpi-calc-price').addEventListener('input', function() {
+  const display = document.getElementById('bpi-price-display');
+  if (display) display.textContent = '$' + Math.round(parseFloat(this.value)||0).toLocaleString();
+  calcBpi();
+  if (selectedBosaId) updateBosaCallout();
+});
+compute();
+calcBpi();
+</script>
+</body>
+</html>
