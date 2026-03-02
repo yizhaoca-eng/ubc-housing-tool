@@ -225,3 +225,4 @@ Three selectable cards (closest Bosa locations to UBC):
 - Tool is a standalone `.html` file with no backend dependencies
 - Recommended hosting: GitHub Pages, Netlify (free tier), or direct file share
 - Chart.js dependency loaded from CDN — requires internet access to render chart
+- **Updating the live tool**: go to repo → "Add file" → "Upload files" → drag new `index.html` → commit. GitHub overwrites the existing file automatically. Pages redeploys in ~60 seconds. Hard refresh the live URL to clear cache (`Cmd+Shift+R` Mac, `Ctrl+Shift+R` Windows)

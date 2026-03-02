@@ -114,6 +114,17 @@
   .brow.btotal .bl { color: var(--text-dark); font-weight: 400; }
   .sb-bosa-badge { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 2px 8px; white-space: nowrap; }
   .note-strip { background: var(--white); border: 1px solid var(--border); padding: 13px 20px; font-size: 11px; color: var(--text-mid); line-height: 1.6; }
+
+  /* Info tooltip */
+  .info-wrap { position: relative; display: inline-flex; align-items: center; gap: 5px; }
+  .info-icon { width: 13px; height: 13px; border-radius: 50%; background: var(--border); color: var(--text-mid); font-size: 9px; font-family: 'Jost', sans-serif; display: inline-flex; align-items: center; justify-content: center; cursor: default; flex-shrink: 0; line-height: 1; user-select: none; }
+  .info-icon:hover { background: var(--text-mid); color: var(--white); }
+  .info-tooltip { display: none; position: absolute; left: 20px; top: -4px; width: 260px; background: var(--text-dark); color: #c4bdb5; font-size: 10px; font-family: 'Jost', sans-serif; line-height: 1.6; padding: 10px 12px; z-index: 50; pointer-events: none; }
+  .info-tooltip table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  .info-tooltip td { padding: 2px 4px; font-size: 9.5px; }
+  .info-tooltip td:last-child { text-align: right; color: var(--white); }
+  .info-tooltip .tt-note { font-size: 9px; color: #9a9390; margin-top: 6px; border-top: 1px solid #3a3632; padding-top: 6px; }
+  .info-wrap:hover .info-tooltip { display: block; }
   .note-strip strong { color: var(--text-dark); font-weight: 400; }
   .over { color: #b94040; } .within { color: var(--rent-color); }
 
@@ -190,12 +201,50 @@
           <input type="range" id="years" min="1" max="30" value="10">
         </div>
         <div class="field">
-          <div class="field-label"><span class="fl-name">Annual Property Appreciation</span><span class="fl-val" id="lbl-appr">4.0%</span></div>
-          <input type="range" id="appr" min="0" max="10" step="0.5" value="4">
+          <div class="field-label">
+            <span class="info-wrap">
+              <span class="fl-name">Annual Property Appreciation</span>
+              <span class="info-icon">i
+                <span class="info-tooltip">
+                  <strong style="color:var(--white);font-size:10px">MLS HPI Benchmark (Apt) — YoY</strong>
+                  <table>
+                    <tr><td style="color:#9a9390"></td><td style="color:#9a9390">Van West</td><td style="color:#9a9390">Richmond</td></tr>
+                    <tr><td>2022</td><td>+11.9%</td><td>+14.1%</td></tr>
+                    <tr><td>2023</td><td>−4.5%</td><td>−4.7%</td></tr>
+                    <tr><td>2024</td><td>+1.9%</td><td>+1.8%</td></tr>
+                    <tr><td>2025</td><td>−2.4%</td><td>−0.2%</td></tr>
+                    <tr><td>2026</td><td>−4.1%</td><td>−9.4%</td></tr>
+                  </table>
+                  <div class="tt-note">Avg YoY (2022–2026): Van West 0.56% · Richmond 0.31%<br>5yr CAGR: Van West 0.38%/yr · Richmond 0.01%/yr<br>Default set to 2% (long-run estimate)</div>
+                </span>
+              </span>
+            </span>
+            <span class="fl-val" id="lbl-appr">2.0%</span>
+          </div>
+          <input type="range" id="appr" min="0" max="10" step="0.5" value="2">
         </div>
         <div class="field">
-          <div class="field-label"><span class="fl-name">Investment Return (Opportunity Cost)</span><span class="fl-val" id="lbl-invest">7.0%</span></div>
-          <input type="range" id="invest" min="0" max="12" step="0.5" value="7">
+          <div class="field-label">
+            <span class="info-wrap">
+              <span class="fl-name">Investment Return (Opportunity Cost)</span>
+              <span class="info-icon">i
+                <span class="info-tooltip">
+                  <strong style="color:var(--white);font-size:10px">Year-over-Year Returns (2021–2025)</strong>
+                  <table>
+                    <tr><td></td><td>GIC</td><td>SPY</td><td>QQQ</td></tr>
+                    <tr><td>2021</td><td>~0.5%</td><td>28.7%</td><td>27.4%</td></tr>
+                    <tr><td>2022</td><td>~1.5%</td><td>−18.2%</td><td>−32.6%</td></tr>
+                    <tr><td>2023</td><td>~4.5%</td><td>26.2%</td><td>54.9%</td></tr>
+                    <tr><td>2024</td><td>~5.0%</td><td>24.9%</td><td>25.6%</td></tr>
+                    <tr><td>2025</td><td>~3.5%</td><td>17.7%</td><td>20.8%</td></tr>
+                  </table>
+                  <div class="tt-note">GIC currently ~2.45–3.5% · SPY/QQQ long-run avg ~10%<br>Default set to 3% (conservative GIC/savings estimate)</div>
+                </span>
+              </span>
+            </span>
+            <span class="fl-val" id="lbl-invest">3.0%</span>
+          </div>
+          <input type="range" id="invest" min="0" max="12" step="0.5" value="3">
         </div>
         <div class="field">
           <div class="field-label"><span class="fl-name">Annual Rent Inflation</span><span class="fl-val" id="lbl-rentinfl">3.0%</span></div>
